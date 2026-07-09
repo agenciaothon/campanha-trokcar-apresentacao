@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trok Car — Campanha de Aniversário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --graphite:#15181C;      /* fundo oficina */
+  --graphite2:#1D2228;     /* painéis */
+  --steel:#2A313A;         /* linhas/aço */
+  --amber:#F4A428;         /* âmbar alerta contido */
+  --amber-d:#C77E12;
+  --red:#D33B2C;           /* sinal */
+  --teal:#2FB4A6;          /* diagnóstico ok */
+  --paper:#EDE7DC;         /* texto claro */
+  --paper-dim:#9AA1A9;     /* texto secundário */
+  --line:#333B45;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--graphite);
+  color:var(--paper);
+  font-family:'Archivo',sans-serif;
+  overflow:hidden;
+}
+/* ---------- deck ---------- */
+#deck{position:fixed;inset:0}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:clamp(28px,4.5vw,72px);
+  opacity:0;visibility:hidden;
+  transform:translateX(40px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1),visibility .55s;
+  overflow:hidden;
+}
+.slide.active{opacity:1;visibility:visible;transform:translateX(0)}
+.slide.prev{transform:translateX(-40px)}
+
+/* textura de grid tênue de oficina */
+.slide::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:52px 52px;opacity:.05;
+}
+
+/* ---------- topo padrão ---------- */
+.slug{display:flex;align-items:center;gap:14px;margin-bottom:auto;z-index:2}
+.gauge{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--steel);position:relative;flex:none;
+  display:grid;place-items:center;
+}
+.gauge::after{content:"";width:4px;height:14px;background:var(--amber);border-radius:2px;
+  position:absolute;transform-origin:bottom center;bottom:15px;transform:rotate(var(--rot,40deg))}
+.slug .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--paper-dim)}
+.slug .idx{margin-left:auto;font-family:'Space Mono',monospace;font-size:12px;color:var(--paper-dim);letter-spacing:.15em}
+
+.content{z-index:2;margin:auto 0}
+h1,h2{font-family:'Archivo',sans-serif;line-height:1.02;letter-spacing:-.02em}
+.kicker{font-family:'Space Mono',monospace;color:var(--amber);font-size:13px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:18px}
+.lead{font-size:clamp(17px,1.7vw,21px);line-height:1.55;color:var(--paper);max-width:60ch}
+.dim{color:var(--paper-dim)}
+.amber{color:var(--amber)}
+.teal{color:var(--teal)}
+strong{color:#fff;font-weight:700}
+em{color:var(--amber);font-style:normal;font-weight:600}
+
+/* reveal por elemento */
+.r{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+.active .r{opacity:1;transform:none}
+.active .r:nth-child(1){transition-delay:.10s}
+.active .r:nth-child(2){transition-delay:.20s}
+.active .r:nth-child(3){transition-delay:.30s}
+.active .r:nth-child(4){transition-delay:.40s}
+.active .r:nth-child(5){transition-delay:.50s}
+.active .r:nth-child(6){transition-delay:.60s}
+.active .r:nth-child(7){transition-delay:.70s}
+.active .r:nth-child(8){transition-delay:.80s}
+
+/* ---------- CAPA ---------- */
+.cover{justify-content:center;align-items:flex-start}
+.cover .brandline{font-family:'Space Mono',monospace;letter-spacing:.3em;font-size:13px;color:var(--paper-dim);text-transform:uppercase;margin-bottom:26px}
+.cover h1{font-size:clamp(48px,9vw,132px);font-weight:900;letter-spacing:-.04em;line-height:.92}
+.cover h1 .l2{color:var(--amber)}
+.cover .sub{margin-top:22px;font-size:clamp(16px,1.7vw,20px);color:var(--paper-dim);max-width:52ch;line-height:1.5}
+.tagwrap{margin-top:40px;border-left:3px solid var(--red);padding-left:20px}
+.tagwrap .q{font-family:'Archivo',sans-serif;font-weight:700;font-size:clamp(20px,2.6vw,32px);letter-spacing:-.02em}
+.tagwrap .qs{color:var(--paper-dim);font-size:13px;font-family:'Space Mono',monospace;letter-spacing:.15em;margin-top:8px;text-transform:uppercase}
+
+/* ---------- listas / cards ---------- */
+.grid{display:grid;gap:16px;margin-top:26px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--graphite2);border:1px solid var(--line);border-radius:14px;padding:22px 22px}
+.card h3{font-size:15px;font-family:'Space Mono',monospace;letter-spacing:.06em;color:var(--amber);margin-bottom:10px;text-transform:uppercase;font-weight:700}
+.card p{font-size:15px;line-height:1.5;color:var(--paper)}
+.card.alt h3{color:var(--teal)}
+
+.rows{margin-top:24px;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:220px 1fr;gap:24px;padding:16px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.row .k{font-family:'Space Mono',monospace;font-size:14px;color:var(--amber);letter-spacing:.04em}
+.row .v{font-size:16px;line-height:1.5;color:var(--paper)}
+.row .v small{color:var(--paper-dim)}
+
+.pill{display:inline-block;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  border:1px solid var(--steel);border-radius:999px;padding:6px 12px;color:var(--paper-dim);margin:0 8px 8px 0}
+
+/* quote/insight box */
+.insight{background:linear-gradient(180deg,rgba(244,164,40,.08),transparent);border:1px solid var(--amber-d);
+  border-left:4px solid var(--amber);border-radius:12px;padding:22px 24px;margin-top:24px}
+.insight .lb{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.insight p{font-size:clamp(16px,1.8vw,20px);line-height:1.5}
+
+/* ---------- tabela risco ---------- */
+.tbl{margin-top:22px;width:100%;border-collapse:collapse;font-size:15px}
+.tbl th{background:var(--graphite2);text-align:left;padding:12px 14px;font-family:'Space Mono',monospace;font-size:12px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--amber);border:1px solid var(--line)}
+.tbl td{padding:12px 14px;border:1px solid var(--line);vertical-align:top;line-height:1.45}
+.tbl tr td:first-child{color:#fff;font-weight:600;white-space:nowrap}
+.tbl .anti{color:var(--teal)}
+
+/* ---------- AARRR esteira ---------- */
+.belt{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:30px;position:relative}
+.stn{background:var(--graphite2);border:1px solid var(--line);border-radius:14px;padding:20px 16px;position:relative;overflow:hidden}
+.stn .n{font-family:'Space Mono',monospace;font-size:12px;color:var(--paper-dim);letter-spacing:.1em}
+.stn .step{font-weight:800;font-size:20px;margin:8px 0 4px;letter-spacing:-.01em}
+.stn .en{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase}
+.stn .desc{font-size:13.5px;line-height:1.45;color:var(--paper-dim);margin-top:12px}
+.stn .trok{font-size:12.5px;line-height:1.4;color:var(--teal);margin-top:12px;border-top:1px dashed var(--steel);padding-top:10px}
+.stn .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--amber);width:0;transition:width .9s ease}
+.active .stn .bar{width:100%}
+.active .stn:nth-child(1) .bar{transition-delay:.3s}
+.active .stn:nth-child(2) .bar{transition-delay:.5s}
+.active .stn:nth-child(3) .bar{transition-delay:.7s}
+.active .stn:nth-child(4) .bar{transition-delay:.9s}
+.active .stn:nth-child(5) .bar{transition-delay:1.1s}
+.belt .flow{grid-column:1/-1;display:flex;align-items:center;gap:10px;color:var(--paper-dim);font-family:'Space Mono',monospace;font-size:12px;margin-top:6px;letter-spacing:.08em}
+.belt .flow b{color:var(--amber)}
+
+/* ---------- roteiro ---------- */
+.script{margin-top:22px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.script .sh{display:grid;grid-template-columns:96px 1fr 1fr;background:var(--graphite2)}
+.script .sh div{padding:12px 16px;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);border-right:1px solid var(--line)}
+.script .sr{display:grid;grid-template-columns:96px 1fr 1fr;border-top:1px solid var(--line)}
+.script .sr div{padding:13px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.45}
+.script .sr .t{font-family:'Space Mono',monospace;color:var(--amber);font-size:13px}
+.script .sr .say{color:#fff}
+.script .sr .img{color:var(--paper-dim);font-size:13px}
+.scriptnote{margin-top:14px;font-size:14px;color:var(--teal);line-height:1.5;border-left:3px solid var(--teal);padding-left:14px}
+.stitle{display:flex;align-items:baseline;gap:14px}
+.stitle .tag{font-family:'Space Mono',monospace;font-size:12px;color:var(--graphite);background:var(--amber);padding:4px 10px;border-radius:6px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+
+h2.big{font-size:clamp(30px,4.6vw,60px);font-weight:900;letter-spacing:-.03em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+@media(max-width:900px){
+  .g2,.g3,.two{grid-template-columns:1fr}
+  .belt{grid-template-columns:1fr 1fr}
+  .row{grid-template-columns:1fr}
+  .script .sh,.script .sr{grid-template-columns:70px 1fr}
+  .script .sh div:last-child,.script .sr div:last-child{display:none}
+}
+
+/* ---------- navegação ---------- */
+#nav{position:fixed;bottom:22px;right:26px;display:flex;align-items:center;gap:14px;z-index:50}
+#nav button{background:var(--graphite2);border:1px solid var(--steel);color:var(--paper);width:44px;height:44px;border-radius:10px;
+  font-size:18px;cursor:pointer;transition:.2s;display:grid;place-items:center}
+#nav button:hover{border-color:var(--amber);color:var(--amber)}
+#nav .count{font-family:'Space Mono',monospace;font-size:13px;color:var(--paper-dim);letter-spacing:.1em}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--amber);z-index:60;transition:width .4s ease}
+.brandmark{position:fixed;top:22px;right:26px;z-index:40;display:flex;align-items:center;gap:10px;opacity:.9}
+.brandmark img{height:26px;filter:invert(1) brightness(1.4)}
+.brandmark span{font-family:'Space Mono',monospace;font-size:10px;color:var(--paper-dim);letter-spacing:.14em;text-transform:uppercase}
+.hint{position:fixed;bottom:26px;left:26px;z-index:40;font-family:'Space Mono',monospace;font-size:11px;color:var(--paper-dim);letter-spacing:.1em}
+@media print{.hint,#nav{display:none}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="brandmark"><img src="data:image/png;base64,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" alt="Othon Publicidade"><span>Othon Publicidade</span></div>
+
+<div id="deck">
+
+  <!-- 0 CAPA -->
+  <section class="slide cover active">
+    <div class="content">
+      <div class="brandline r">Trok Car Brasil · Três Lagoas / MS · Julho</div>
+      <h1 class="r">O ANIVERSÁRIO<br><span class="l2">É NOSSO.</span></h1>
+      <div class="sub r">Campanha de aniversário e roteiros de vídeo de 45 segundos. Uma proposta construída sobre o comportamento real de quem cuida do carro — não sobre desconto.</div>
+      <div class="tagwrap r">
+        <div class="q">“O presente é seu.”</div>
+        <div class="qs">Conceito em aberto · a assinatura final é a próxima decisão</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 POR QUE -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:-30deg"></span><span class="eyebrow">Diagnóstico</span><span class="idx">01 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">Por que esta campanha — e não a de sempre</div>
+      <h2 class="big r">A oficina vende prevenção.<br>O cliente só chega na <span class="amber">dor</span>.</h2>
+      <p class="lead r" style="margin-top:22px">A campanha comum comemora o aniversário da empresa e não resolve nada para o cliente. A da Trok inverte isso. O onboarding revelou a contradição que vale a campanha inteira: <strong>a Trok vende revisão preventiva, mas o cliente só procura a oficina quando o carro já falhou.</strong> Quando ele chega na urgência, a decisão vira leilão de preço — por isso a objeção nº 1 é sempre “ter que gastar”.</p>
+      <div class="insight r">
+        <div class="lb">O ponto de virada</div>
+        <p>Enquanto a Trok competir pela emergência, competirá por preço. A saída é provocar a decisão <em>antes</em> da falha — quando ainda é barato, e quando a confiança pesa mais que o valor.</p>
+      </div>
+      <p class="lead dim r" style="margin-top:18px;font-size:14px">Base: Kotler &amp; Keller — no modelo das cinco etapas de decisão, cabe ao marketing provocar o interesse em compras que o cliente tende a adiar. É exatamente o caso da manutenção preventiva.</p>
+    </div>
+  </section>
+
+  <!-- 2 MERCADO -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:0deg"></span><span class="eyebrow">Contexto de mercado</span><span class="idx">02 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">O momento joga a favor da Trok</div>
+      <h2 class="big r">Carro velho, dono segurando,<br>reparo caro à espreita.</h2>
+      <div class="grid g3">
+        <div class="card r"><h3>Frota recorde</h3><p>A frota de <strong>automóveis</strong> do Brasil atingiu cerca de <strong>11 anos</strong> de idade média em 2024 — o maior patamar da série histórica do Sindipeças. São mais de <strong>38 milhões de carros</strong> rodando, cada vez mais velhos.</p></div>
+        <div class="card r"><h3>Ninguém troca</h3><p>Carro novo caro, crédito caro, renda parada. <strong>O público da Trok não vai trocar de carro</strong> — vai depender da manutenção.</p></div>
+        <div class="card r"><h3>Custo do adiar</h3><p>A faixa de carros com <strong>mais de 11 anos</strong> já é a maior de todas. E falhas de preventiva estão entre as <strong>maiores causas de reparo caro</strong> de motor — a maioria evitável com inspeção.</p></div>
+      </div>
+      <p class="lead r" style="margin-top:24px">Traduzindo para Três Lagoas: os carros estão envelhecendo, os donos não vão trocá-los, e <strong>o custo de não fazer a preventiva é justamente o reparo caro que eles mais temem.</strong> A objeção “gastar” deixa de ser obstáculo e vira o gancho.</p>
+      <p class="lead dim r" style="margin-top:14px;font-size:13px;font-family:'Space Mono',monospace;letter-spacing:.04em">Fonte: Sindipeças — Relatório da Frota Circulante (dados Senatran), edições 2025–2026.</p>
+    </div>
+  </section>
+
+  <!-- 3 RISCO -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:30deg"></span><span class="eyebrow">Campo de batalha</span><span class="idx">03 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">O verdadeiro obstáculo é o risco percebido</div>
+      <h2 class="big r">O medo tem antídoto —<br>e a Trok <span class="teal">já o tem</span>.</h2>
+      <table class="tbl r">
+        <tr><th>Risco (Kotler)</th><th>Como aparece na cabeça do cliente</th><th>Antídoto que a Trok já tem</th></tr>
+        <tr><td>Financeiro</td><td>“Vou pagar caro e não vai valer a pena.”</td><td class="anti">Preço justo + mostrar o problema antes de virar reparo grande</td></tr>
+        <tr><td>Funcional</td><td>“E se o serviço for mal feito?”</td><td class="anti">Qualidade — um dos 3 pilares da marca</td></tr>
+        <tr><td>Psicológico</td><td>“A oficina vai me enrolar e inventar defeito.”</td><td class="anti">Honestidade + Família — os outros 2 pilares</td></tr>
+      </table>
+      <p class="lead r" style="margin-top:22px">Não é coincidência: os três valores que a própria Trok declarou — <strong>família, honestidade e qualidade</strong> — são exatamente os antídotos para os três medos do cliente. A marca já <em>é</em> a resposta à objeção. Só faltava comunicar isso como estratégia.</p>
+    </div>
+  </section>
+
+  <!-- 4 GRANDE IDEIA -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:15deg"></span><span class="eyebrow">A grande ideia</span><span class="idx">04 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">Não é desconto. É transferência de risco.</div>
+      <h2 class="big r">A Trok assume o risco<br>que o cliente <span class="amber">tem medo</span> de assumir.</h2>
+      <p class="lead r" style="margin-top:20px">No mês de aniversário, a oficina inverte o fluxo: em vez de pedir que o cliente gaste, <strong>ela dá a Checagem Preventiva de Aniversário</strong> — diagnóstico de freio, suspensão e arrefecimento, os carros-chefe da casa. Um só gesto resolve quatro travas de uma vez.</p>
+      <div class="grid g2">
+        <div class="card r"><h3>Provoca a decisão</h3><p>Faz o cliente checar o carro <strong>antes</strong> da falha — quando ainda é barato. Resolve o “só vem na dor”.</p></div>
+        <div class="card r"><h3>Desarma o medo</h3><p>“A gente olha, te mostra e você decide.” Ataca de frente o receio de <strong>ser enrolado</strong>.</p></div>
+        <div class="card alt r"><h3>Abre a porta</h3><p>Oferta de baixíssima fricção para entrar — despenca o custo de <strong>captar cliente novo</strong>.</p></div>
+        <div class="card alt r"><h3>Ativa o pós-venda</h3><p>Todo carro checado entra em <strong>acompanhamento</strong> — “seu freio está em 60%, avisamos quando chegar a hora”.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 AARRR CONCEITO -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:45deg"></span><span class="eyebrow">Os cinco momentos do cliente</span><span class="idx">05 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">Por que o presente se paga</div>
+      <h2 class="big r">O cliente entra pela checagem grátis,<br>e o <span class="teal">fidelizamos</span> pela confiança gerada.</h2>
+      <p class="lead r" style="margin-top:16px;max-width:70ch">A maioria das oficinas só cuida de dois momentos: atrair gente e vender. Ignora o meio — e o balde fura. A campanha da Trok toca <strong>os cinco</strong>. Cada estação abaixo é um momento da jornada; o presente é a engrenagem que faz o ciclo girar.</p>
+      <div class="belt r">
+        <div class="stn"><div class="n">01</div><div class="step">Descobrir</div><div class="en">Aquisição</div><div class="desc">A pessoa conhece a Trok pela primeira vez.</div><div class="trok">O vídeo de 45s prende quem nunca ouviu falar.</div><div class="bar"></div></div>
+        <div class="stn"><div class="n">02</div><div class="step">Experimentar</div><div class="en">Ativação</div><div class="desc">Dá o primeiro passo: chama no WhatsApp, agenda, aparece.</div><div class="trok">A checagem grátis tira o medo de começar.</div><div class="bar"></div></div>
+        <div class="stn"><div class="n">03</div><div class="step">Voltar</div><div class="en">Retenção</div><div class="desc">Retorna — o ouro da oficina, hoje a trava do pós-venda.</div><div class="trok">O aviso do desgaste traz o cliente de volta na hora certa.</div><div class="bar"></div></div>
+        <div class="stn"><div class="n">04</div><div class="step">Pagar</div><div class="en">Receita</div><div class="desc">Fecha o serviço — depois da confiança, não antes.</div><div class="trok">Vende porque o cliente já confia no diagnóstico.</div><div class="bar"></div></div>
+        <div class="stn"><div class="n">05</div><div class="step">Indicar</div><div class="en">Referência</div><div class="desc">Fala pra outra pessoa — a mídia mais barata que existe.</div><div class="trok">Em Três Lagoas, o boca a boca vale mais que anúncio.</div><div class="bar"></div></div>
+        <div class="flow"><span>Descobrir</span><b>→</b><span>Experimentar</span><b>→</b><span>Voltar</span><b>→</b><span>Pagar</span><b>→</b><span>Indicar</span><b>↺</b><span>e o ciclo recomeça</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 DECISOES -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:-15deg"></span><span class="eyebrow">Decisões para aprovar</span><span class="idx">06 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">Três escolhas destravam a produção em julho</div>
+      <h2 class="big r" style="margin-bottom:6px">O que precisamos do cliente.</h2>
+      <div class="rows">
+        <div class="row r"><div class="k">A · Formato da oferta</div><div class="v"><strong>Checagem 100% grátis</strong> (recomendada) — máximo poder contra o medo de ser enrolado e melhor isca de captação. &nbsp;<small>Alternativas: valor simbólico de R$29 para filtrar curioso · desconto no serviço (devolve a conversa para o preço — evitar).</small></div></div>
+        <div class="row r"><div class="k">B · Porta-voz do vídeo</div><div class="v"><strong>Rafael na câmera</strong> (recomendada) — o rosto do dono é o maior ativo de confiança de uma oficina. &nbsp;<small>Alternativas: locução sobre imagens da oficina · depoimento de cliente real como reforço ao longo do mês.</small></div></div>
+        <div class="row r"><div class="k">C · Gancho inicial</div><div class="v"><strong>Rodar Roteiro 1 + Roteiro 3 em teste A/B</strong> — alerta para gerar agendamento, provocação para gerar alcance. &nbsp;<small>O que performar melhor recebe a verba.</small></div></div>
+      </div>
+      <div class="insight r"><div class="lb">Métrica North Star</div><p>Nº de Checagens de Aniversário agendadas e realizadas — mede captação de cliente novo, alimenta o pós-venda e prevê receita futura.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 ROTEIRO 1 -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:-40deg"></span><span class="eyebrow">Roteiro · 45 segundos</span><span class="idx">07 / 10</span></div>
+    <div class="content">
+      <div class="stitle r"><span class="tag">Gancho 1 · Alerta</span><h2 class="big">“O Barulho”</h2></div>
+      <p class="lead dim r" style="margin-top:10px;font-size:15px">Provoca o reconhecimento do problema antes da falha. Vertical, legenda embutida.</p>
+      <div class="script r">
+        <div class="sh"><div>Tempo</div><div>Fala / texto na tela</div><div>Imagem</div></div>
+        <div class="sr"><div class="t">0–3s</div><div class="say">[som de freio rangendo] “Ouviu esse barulho? Seu carro já está te avisando.”</div><div class="img">Close no freio / roda. Legenda grande.</div></div>
+        <div class="sr"><div class="t">3–12s</div><div class="say">“A gente adia. ‘Depois eu levo.’ Só que o depois costuma custar 5 vezes mais que o hoje.”</div><div class="img">Rafael na oficina, tom próximo.</div></div>
+        <div class="sr"><div class="t">12–22s</div><div class="say">“Freio, suspensão, arrefecimento. É onde o problema começa pequeno — e vira caro quando ninguém olha a tempo.”</div><div class="img">Peças reais sendo apontadas / carro no elevador.</div></div>
+        <div class="sr"><div class="t">22–35s</div><div class="say">“Esse mês a Trok faz aniversário. E o presente é seu: a gente checa isso tudo no seu carro, de graça. Sem compromisso.”</div><div class="img">Rafael sorri; equipe ao fundo.</div></div>
+        <div class="sr"><div class="t">35–45s</div><div class="say">“Se estiver tudo certo, você sai tranquilo. Se tiver algo, você decide.”</div><div class="img">Cartela final: logo + WhatsApp.</div></div>
+      </div>
+      <p class="scriptnote r">Abre no medo da falha iminente e fecha com transferência de risco (“de graça, sem compromisso, você decide”). É o roteiro mais forte para gerar agendamento imediato.</p>
+    </div>
+  </section>
+
+  <!-- 8 ROTEIRO 2 e 3 -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:20deg"></span><span class="eyebrow">Roteiros · 45 segundos</span><span class="idx">08 / 10</span></div>
+    <div class="content">
+      <div class="two">
+        <div>
+          <div class="stitle r"><span class="tag">Gancho 2 · Confiança</span></div>
+          <h2 class="r" style="font-size:28px;font-weight:800;margin:10px 0 4px">“O que ninguém te mostra”</h2>
+          <p class="lead dim r" style="font-size:14px;margin-bottom:14px">Reposiciona a Trok pela honestidade.</p>
+          <div class="script r">
+            <div class="sh"><div>Tempo</div><div>Fala</div></div>
+            <div class="sr"><div class="t">0–3s</div><div class="say">“Já saiu de uma oficina achando que pagou por algo que talvez nem precisasse?”</div></div>
+            <div class="sr"><div class="t">3–14s</div><div class="say">“É por isso que a Trok trabalha diferente: mostra a peça, explica o porquê, e só mexe no que precisa.”</div></div>
+            <div class="sr"><div class="t">14–26s</div><div class="say">“Aqui é oficina de família. O que não faria no carro da nossa mãe, não faz no seu.”</div></div>
+            <div class="sr"><div class="t">26–38s</div><div class="say">“No nosso aniversário, esse cuidado vira presente: checagem completa, por nossa conta.”</div></div>
+            <div class="sr"><div class="t">38–45s</div><div class="say">“Sem pressão. Vem conhecer a Trok.”</div></div>
+          </div>
+          <p class="scriptnote r">Ataca o medo de ser enrolado. Melhor roteiro para marca de longo prazo.</p>
+        </div>
+        <div>
+          <div class="stitle r"><span class="tag">Gancho 3 · Provocação</span></div>
+          <h2 class="r" style="font-size:28px;font-weight:800;margin:10px 0 4px">“Presente ao contrário”</h2>
+          <p class="lead dim r" style="font-size:14px;margin-bottom:14px">Quebra de padrão para parar o feed.</p>
+          <div class="script r">
+            <div class="sh"><div>Tempo</div><div>Fala</div></div>
+            <div class="sr"><div class="t">0–3s</div><div class="say">“Todo mundo faz promoção no aniversário pra VOCÊ gastar. A gente vai fazer o contrário.”</div></div>
+            <div class="sr"><div class="t">3–13s</div><div class="say">“É o aniversário da Trok. Mas quem ganha presente é você.”</div></div>
+            <div class="sr"><div class="t">13–26s</div><div class="say">“Traz o carro que a gente checa freio, suspensão e arrefecimento de graça.”</div></div>
+            <div class="sr"><div class="t">26–38s</div><div class="say">“Porque a gente prefere ganhar sua confiança a ganhar sua pressa.”</div></div>
+            <div class="sr"><div class="t">38–45s</div><div class="say">“Presente da Trok, esperando por você.”</div></div>
+          </div>
+          <p class="scriptnote r">A quebra de expectativa gera parada de scroll e comentário — combustível de alcance orgânico. Roda junto ao Roteiro 1 no teste A/B.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 PROXIMO PASSO -->
+  <section class="slide">
+    <div class="slug"><span class="gauge" style="--rot:40deg"></span><span class="eyebrow">Próximo passo</span><span class="idx">09 / 10</span></div>
+    <div class="content">
+      <div class="kicker r">Com o “ok”, o aniversário começa a trabalhar pela Trok</div>
+      <h2 class="big r">Três aprovações e a gravação começa.</h2>
+      <div class="grid g3" style="margin-top:30px">
+        <div class="card r"><h3>Decisão A</h3><p>Formato da oferta.<br><strong>Recomendação: checagem 100% grátis.</strong></p></div>
+        <div class="card r"><h3>Decisão B</h3><p>Porta-voz do vídeo.<br><strong>Recomendação: Rafael na câmera.</strong></p></div>
+        <div class="card r"><h3>Decisão C</h3><p>Gancho inicial.<br><strong>Recomendação: Roteiro 1 + 3 em A/B.</strong></p></div>
+      </div>
+      <p class="lead r" style="margin-top:30px">Aprovadas as três, a Othon inicia a gravação e a estruturação das campanhas de anúncios: alcance local, conversão para agendamento no WhatsApp e remarketing de quem assistiu ao vídeo.</p>
+    </div>
+  </section>
+
+  <!-- 10 FECHO -->
+  <section class="slide cover">
+    <div class="content">
+      <div class="brandline r">Trok Car Brasil × Othon Publicidade</div>
+      <h1 class="r" style="font-size:clamp(40px,7vw,104px)">O presente é a<br><span class="l2">engrenagem.</span></h1>
+      <div class="sub r">Não um gasto — o gesto que faz o cliente descobrir, experimentar, voltar, pagar e indicar. É assim que uma oficina de família vira a oficina que a cidade confia.</div>
+      <div class="tagwrap r"><div class="q">Vamos gravar.</div><div class="qs">diretoria@othonpublicidade.com.br · (67) 9 9287-6907</div></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="hint">← → ou espaço para navegar</div>
+<div id="nav">
+  <span class="count"><span id="cur">1</span> / <span id="tot">11</span></span>
+  <button id="prev" aria-label="Anterior">←</button>
+  <button id="next" aria-label="Próximo">→</button>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let i=0;const tot=slides.length;
+document.getElementById('tot').textContent=tot;
+const bar=document.getElementById('bar');
+function go(n){
+  n=Math.max(0,Math.min(tot-1,n));
+  slides.forEach((s,k)=>{s.classList.remove('active','prev');if(k<n)s.classList.add('prev');});
+  slides[n].classList.add('active');
+  i=n;
+  document.getElementById('cur').textContent=i+1;
+  bar.style.width=((i)/(tot-1)*100)+'%';
+}
+document.getElementById('next').onclick=()=>go(i+1);
+document.getElementById('prev').onclick=()=>go(i-1);
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+  if(e.key==='Home')go(0);if(e.key==='End')go(tot-1);
+});
+// swipe mobile
+let sx=0;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));},{passive:true});
+go(0);
+</script>
+</body>
+</html>
